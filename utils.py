@@ -1,6 +1,11 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import pickle
+import itertools
+
+### Generally useful functions for plotting and saving models ####
+
 
 def get_bgg_from_bga(bga_game, bgg_data):
 
@@ -144,8 +149,6 @@ def get_price_from_user(user_bgg_ids, bga_data):
 
 	return bg
 
-
-
 def separate_owned_bgs(user_data, bgg_data):
 
 	user_bgg_owned_ids = user_data[user_data['bgg_user_owned'] == 1.0]['bgg_id'].values
@@ -163,16 +166,72 @@ def strip_currency(prices):
 
 	return prices
 
+def load_dataframe(folder, infile):
 
-bga_file = "/home/josh/Documents/Code/Projects/bgg/board-game-scraper/feeds/bga/GameItem/2020-05-28T16-27-50.jl"
-bgg_file = "/home/josh/Documents/Code/Projects/bgg/board-game-scraper/feeds/bgg/GameItem/2020-05-27T05-38-16.jl"
-user_file = '/home/josh/Documents/Code/Projects/board-game-filler/test.jl'
+	if infile.split('.')[-1] == 'jl':
 
-#bga_data = pd.read_json(bga_file, lines=True)
-#bgg_data = pd.read_json(bgg_file, lines=True)
-user_data = pd.read_json(user_file, lines=True)
+		df = pd.read_json(folder + infile).reset_index(drop=True)
 
-#bgg_id = bgg_data['bgg_id']
+	elif infile.split('.')[-1] == 'csv':
+
+		df = pd.read_csv(folder + infile).reset_index(drop=True)
+
+	return df
+
+
+def save_dataframe(df, folder, outfile):
+
+	if outfile.split('.')[-1] == 'jl':
+
+		df.to_json(folder + outfile)
+
+	elif outfile.split('.')[-1] == 'csv':
+
+		df.to_csv(folder + outfile)
+
+	return df
+
+
+def load_model(folder, infile):
+	''' Used for both sklearn models
+		and tfidf vectorizers.'''
+
+	model = pickle.load( open(folder + infile, 'rb') )
+
+	return model
+
+def save_model(model, folder, outfile):
+	''' Used for both sklearn models
+		and tfidf vectorizers.'''
+
+	pickle.dump(model, open(folder + outfile, 'wb'))
+
+def save_report(report, folder, outfile, runtime='', baseline='', stddev=''):
+
+	report_df = pd.DataFrame(report).transpose()
+	report_df['runtime'] = runtime
+	report_df['baseline'] = baseline
+	report_df['stddev'] = stddev
+	report_df.to_csv(folder + outfile)
+
+
+# bga_file = "/home/josh/Documents/Code/Projects/bgg/board-game-scraper/feeds/bga/GameItem/2020-05-28T16-27-50.jl"
+# bgg_file = "/home/josh/Documents/Code/Projects/bgg/board-game-scraper/feeds/bgg/GameItem/2020-05-27T05-38-16.jl"
+# #user_file = '/home/josh/Documents/Code/Projects/board-game-filler/test.jl'
+
+# # #bga_data = pd.read_json(bga_file, lines=True)
+# bgg_data = pd.read_json(bgg_file, lines=True)
+# #user_data = pd.read_json(user_file, lines=True)
+# #print(bgg_data['mechanic'].head(10))
+
+# ids = bgg_data.bgg_id.unique()
+
+# d = {i:0 for i in ids}
+
+# print(d)
+
+
+#plt.scatter(bgg_data['avg_rating'].values, bgg_data['rating'].values)
 
 #bga_names = bga_data['name']
 #bga_price = bga_data['list_price']
