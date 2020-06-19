@@ -22,6 +22,8 @@ This will return a JSON file (e.g., example.jl) containing user comments and boa
 
 chunk_files.sh: Break up example.jl into smaller JSON files 
 
+plotting.py: Useful visuzalizations (comparing model performance, word feature importance, etc)
+
 pseudolabel.py: Perform pseudolabeling of comments using keywords related to board game related categories
 
 run_categorezation.py: Run binary classification of comment categorization using example.jl (or whatever JSON file you scraped)
