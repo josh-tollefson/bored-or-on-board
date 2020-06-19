@@ -1,0 +1,4 @@
+nltk
+seaborn
+scikit-learn>=0.23
+streamlit
