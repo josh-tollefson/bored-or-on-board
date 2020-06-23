@@ -3,7 +3,7 @@ A project built to deliver focused feedback for board game developers.
 
 Board games are a multi-billion dollar industry nowadays and the number of board games published each year has grown tremendously since the early 2000s
 
-![board-game-numbers](./bg-per-year.png | width=100)
+![board-game-numbers](./bg-per-year.png){:height="50%" width="50%"}
 
 Games are no longer like Monopoly, a common family game.
 
