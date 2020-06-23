@@ -16,7 +16,7 @@ by Markus Shepherd
 
 > pip install board-game-scraper
 
-This will return a JSON file (e.g., example.jl) containing user comments and board games. You need about 20000 comments to run some of the models from scratch
+This will return a JSON file (e.g., example.jl) containing user comments and board games. 
 
 ## Files 
 
