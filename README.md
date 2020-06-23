@@ -3,7 +3,11 @@ A project built to deliver focused feedback for board game developers.
 
 Board games are a multi-billion dollar industry nowadays and the number of board games published each year has grown tremendously since the early 2000s
 
-![boarg-game-numbers](./bg-per-year.png)
+![board-game-numbers](./bg-per-year.png | width=100)
+
+Games are no longer like Monopoly, a common family game.
+
+Board game design is like an Engineers
 
 ## Requirements
 This program works on Anaconda Python v.3.7.3
