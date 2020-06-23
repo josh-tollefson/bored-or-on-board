@@ -3,7 +3,7 @@
 
 Board games are a multi-billion dollar industry nowadays and the number of board games published each year has grown tremendously since the early 2000s
 
-![board-game-numbers](./bg-per-year.png?s=200}
+<img src="./bg-per-year.png" width="100" height="100">
 
 Games are no longer like Monopoly, a common family game that is notorious for long play times and ruining friendships. Nowadays, board games are vibrant, diverse, and unique experiences to be shared among friends and families. In a growing market, quick, directed feedback is needed to both improve the game's favoribility with its players, and ensure a high-quality product is published sooner in order to move onto the next big idea.
 
