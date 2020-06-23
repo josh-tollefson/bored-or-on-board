@@ -1,5 +1,9 @@
 # Bored, or on Board?
-A project build to deliver focused feedback for board game developers
+A project built to deliver focused feedback for board game developers.
+
+Board games are a multi-billion dollar industry nowadays and the number of board games published each year has grown tremendously since the early 2000s
+
+![boarg-game-numbers](./bg-per-year.png)
 
 ## Requirements
 This program works on Anaconda Python v.3.7.3
