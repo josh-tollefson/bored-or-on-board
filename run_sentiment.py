@@ -22,7 +22,16 @@ from sklearn.linear_model import LogisticRegression
 
 
 def get_sentiment(ratings, min_rating = 4.0, max_rating = 9.0):
-	# Takes dataframe of ratings
+	'''
+	Filter dataframe based on extreme ratings to set up sentiment analysis
+	based on 0 or 1 labels for future classification work
+	INPUT:
+		ratings: dataframe, column of user ratings
+		min_rating: float, minimum rating for filtering
+		max_rating: float, maximum rating for filtering
+	OUTPUT:
+		sentiment, dataframe column with the filtered 0 or 1 sentiment
+	'''
 
 	df_sentiment = pd.DataFrame(0, index=np.arange(len(ratings.to_numpy())), columns=['sentiment'])
 
@@ -327,39 +336,36 @@ def plot_important_words(top_scores, top_words, bottom_scores, bottom_words, nam
     plt.show()
 
 
-def run_model(model, X, Y, kfolds = None):
-
+def run_model(model, X, Y):
+	'''
+	Train and return model parameters for sentiment analysis
+	INPUTS: 
+			model, sklearn model
+			X, array of vectorized comments
+			Y, array of sentiment labels (0, 1)
+	OUTPUTS:
+			best_grid: optimum best_grid model based on hyperparam. tuning
+			score: float, accuracy of best model
+			report: classification report of best model
+			runtime: float, total runtime (s) to train model
+			baseline_acc: int of baseline accuracy based on random sampling
+	'''
 
 	zero_label = list(Y).count(0)
 	one_label = list(Y).count(1)
 	baseline_acc = (zero_label / (zero_label + one_label))**2 + (one_label / (zero_label + one_label))**2
 
-	scores = []
-	models = []
-
 	start = timeit.default_timer()
 
-	if kfolds is None:
+	from sklearn.model_selection import train_test_split
+	X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.20, random_state=42)
 
-		from sklearn.model_selection import train_test_split
-
-		X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.20, random_state=42)
-		sm = SMOTE(1.0)
-		X_train, Y_train = sm.fit_sample(X_train, Y_train.ravel())
-		model.fit(X_train, Y_train)
-		scores.append(model.score(X_test, Y_test))
-		models.append(model)
-
-	else:
-
-		for train_index, test_index in kfolds.split(X, Y):
-
-		    X_train, X_test, Y_train, Y_test = X[train_index], X[test_index], Y[train_index], Y[test_index]
-		    sm = SMOTE(1.0)
-		    X_train, Y_train = sm.fit_sample(X_train, Y_train.ravel())
-		    model.fit(X_train, Y_train)
-		    scores.append(model.score(X_test, Y_test))
-		    models.append(model)
+	grid_search = run_grid_search('rf', model)
+	grid_search.fit(X_train, Y_train)
+	best_grid = grid_search.best_estimator_
+	accuracy = best_grid.score(X_test, Y_test)
+	params = grid_search.best_params_
+	score = grid_search.best_score_
 
 	stop = timeit.default_timer()
 
@@ -367,11 +373,35 @@ def run_model(model, X, Y, kfolds = None):
 
 
 	Y_pred = model.predict(X_test)
-	stddev = np.std(scores)
 
 	report = classification_report(Y_test, Y_pred, output_dict=True)
-	return models, scores, report, runtime, baseline_acc, stddev
+	return best_grid, score, report, runtime, baseline_acc
 
+
+def run_grid_search(modeltype, model):
+	'''
+	Return grid_search based on model parameters for random forest only (currently)
+	INPUT:
+		modeltype: str, type of model ('rf' for randomforest currently)
+		model: initialied sklearn model
+	OUTPUT:
+		grid of model and hyperpararmeters
+	'''
+	from sklearn.model_selection import GridSearchCV
+
+	if modeltype == 'rf':
+		param_grid = {
+			'bootstrap': [True],
+			'max_depth': [10, 50, 100],
+			'max_features': [2, 10, 'sqrt'],
+			'min_samples_leaf': [1, 3, 5],
+			'min_samples_split': [2, 6, 10],
+			'n_estimators': [10, 100, 1000]
+		}
+
+	grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2)
+
+	return grid_search
 
 # comments_length=0
 # inpath = '/home/josh/Documents/Code/Projects/board-game-filler/files/'
@@ -381,7 +411,6 @@ def run_model(model, X, Y, kfolds = None):
 # df = df.dropna()#.sort_values(by='bgg_id')
 
 NCOMMENTS = 10000
-
 nmax = 45000
 max_features = 7500
 
@@ -399,11 +428,12 @@ df = df.dropna()
 #model = RandomForestClassifier(n_estimators=200, 
 #                               bootstrap = True,
 #                               max_features = 'sqrt')
+model = RandomForestClassifier()
 #model = MultinomialNB()
 
 comments_reduced = df.iloc[:NCOMMENTS]
 
-model = LogisticRegression()
+#model = LogisticRegression()
 
 #Tfmer = TfidfVectorizer(sublinear_tf=True, max_features=max_features, ngram_range=(1, 4), preprocessor=preprocessor)
 Tfmer = utils.load_model(FOLDER, INPUT_VZER)
@@ -413,12 +443,10 @@ Tfmer = utils.load_model(FOLDER, INPUT_VZER)
 X_transformed = Tfmer.fit_transform(comments_reduced['comment'].values)
 Y = comments_reduced['sentiment'].values
 
-kf = StratifiedKFold(n_splits=5, shuffle=True) 
-
-models, scores, report, runtime, baseline_stats, stddev = run_model(model, X_transformed, Y, kfolds=kf)
+model, score, report, runtime, baseline_stats = run_model(model, X_transformed, Y, kfolds=None)
 
 #utils.save_model(models[-1], FOLDER, OUTPUT_MODEL)
 #utils.save_model(Tfmer, FOLDER, OUTPUT_MODEL)
-utils.save_report(report, FOLDER, OUTPUT_REPORT, runtime=runtime, baseline=baseline_stats, stddev=stddev)
+#utils.save_report(report, FOLDER, OUTPUT_REPORT, runtime=runtime, baseline=baseline_stats, stddev=stddev)
 #utils.save_dataframe('./save/comments_regression.jl')
 
